@@ -1,4 +1,3 @@
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -6,9 +5,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.android_practice.navigation.Screen
-import com.example.android_practice.ui.screens.moviedetails.MovieDetailsScreen
-import com.example.android_practice.ui.screens.movielist.MovieListScreen
-import com.example.android_practice.ui.screens.placeholder.PlaceholderScreen
+import com.example.android_practice.presentation.ui.screens.moviedetails.MovieDetailsScreen
+import com.example.android_practice.presentation.ui.screens.movielist.MovieListScreen
+import com.example.android_practice.presentation.ui.screens.placeholder.PlaceholderScreen
 
 fun NavGraphBuilder.mainNavGraph(navController: NavHostController) {
     navigation(

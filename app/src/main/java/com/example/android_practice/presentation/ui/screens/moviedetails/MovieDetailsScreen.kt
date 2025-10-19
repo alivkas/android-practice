@@ -1,4 +1,4 @@
-package com.example.android_practice.ui.screens.moviedetails
+package com.example.android_practice.presentation.ui.screens.moviedetails
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,7 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.android_practice.data.Movie
+import com.example.android_practice.presentation.state.UiState
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +62,7 @@ fun MovieDetailsScreen(
                 title = {
                     Text(
                         text = when (uiState) {
-                            is MovieDetailsUiState.Success -> (uiState as MovieDetailsUiState.Success).movie.title
+                            is UiState.Success -> (uiState as UiState.Success).data.title
                             else -> "Детали фильма"
                         },
                         maxLines = 1,
@@ -76,7 +78,7 @@ fun MovieDetailsScreen(
         }
     ) { paddingValues ->
         when (val state = uiState) {
-            is MovieDetailsUiState.Loading -> {
+            is UiState.Loading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -84,18 +86,27 @@ fun MovieDetailsScreen(
                     CircularProgressIndicator()
                 }
             }
-            is MovieDetailsUiState.Success -> {
+            is UiState.Success -> {
                 DetailContent(
-                    movie = state.movie,
+                    movie = state.data,
                     modifier = Modifier.padding(paddingValues)
                 )
             }
-            is MovieDetailsUiState.Error -> {
+            is UiState.Error -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Ошибка: ${state.message}")
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Ошибка загрузки фильма")
+                        Text(state.message, color = Color.Red)
+                        Button(
+                            onClick = { viewModel.loadMovie(movieId) },
+                            modifier = Modifier.padding(top = 16.dp)
+                        ) {
+                            Text("Повторить")
+                        }
+                    }
                 }
             }
         }
@@ -103,7 +114,10 @@ fun MovieDetailsScreen(
 }
 
 @Composable
-fun DetailContent(movie: Movie, modifier: Modifier = Modifier) {
+fun DetailContent(
+    movie: com.example.android_practice.domain.model.Movie,
+    modifier: Modifier = Modifier
+) {
     val scrollState = rememberScrollState()
 
     Column(
@@ -118,7 +132,7 @@ fun DetailContent(movie: Movie, modifier: Modifier = Modifier) {
             Card(
                 modifier = Modifier
                     .size(150.dp)
-                    .clip(MaterialTheme.shapes.medium)
+                    .clip(RoundedCornerShape(12.dp))
             ) {
                 AsyncImage(
                     model = movie.posterUrl,
@@ -166,12 +180,13 @@ fun DetailContent(movie: Movie, modifier: Modifier = Modifier) {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    text = "${movie.duration} мин.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
+                if (movie.duration > 0) {
+                    Text(
+                        text = "${movie.duration} мин.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
                 Text(
                     text = movie.country,
@@ -203,18 +218,20 @@ fun DetailContent(movie: Movie, modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = "В главных ролях",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        movie.actors.forEach { actor ->
+        if (movie.actors.isNotEmpty()) {
             Text(
-                text = "• $actor",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 4.dp)
+                text = "В главных ролях",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
             )
+            Spacer(modifier = Modifier.height(8.dp))
+            movie.actors.forEach { actor ->
+                Text(
+                    text = "• $actor",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+            }
         }
     }
 }

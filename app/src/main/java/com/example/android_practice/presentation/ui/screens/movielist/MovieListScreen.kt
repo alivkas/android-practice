@@ -1,7 +1,8 @@
-package com.example.android_practice.ui.screens.movielist
+package com.example.android_practice.presentation.ui.screens.movielist
 
-import androidx.compose.foundation.background
+import android.content.Context
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,14 +16,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
@@ -36,25 +43,46 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.android_practice.data.Movie
+import com.chuckerteam.chucker.api.Chucker
+import com.example.android_practice.domain.model.Movie
+import com.example.android_practice.presentation.state.UiState
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieListScreen(
     onMovieClick: (Int) -> Unit,
-    viewModel: MovieListViewModel = koinViewModel()
+    viewModel: MovieListViewModel = koinViewModel(),
+    context: Context = LocalContext.current
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Фильмы") })
+            TopAppBar(
+                title = { Text("Фильмы") },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            Chucker.getLaunchIntent(context)?.let { intent ->
+                                context.startActivity(intent)
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "Сетевые запросы"
+                        )
+                    }
+                }
+            )
         }
     ) { paddingValues ->
         Column(
@@ -65,7 +93,7 @@ fun MovieListScreen(
             SearchBar(
                 query = searchQuery,
                 onQueryChange = viewModel::searchMovies,
-                onSearch = { viewModel.searchMovies(searchQuery) },
+                onSearch = { },
                 active = false,
                 onActiveChange = { },
                 modifier = Modifier
@@ -75,34 +103,32 @@ fun MovieListScreen(
                 leadingIcon = {
                     Icon(Icons.Default.Search, contentDescription = "Поиск")
                 }
-            ) {
-            }
+            ) {}
 
             when (val state = uiState) {
-                is MovieListUiState.Loading -> {
+                is UiState.Loading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            CircularProgressIndicator()
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text("Загружаем фильмы...")
+                        }
                     }
                 }
-                is MovieListUiState.Success -> {
-                    if (state.movies.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("Фильмы не найдены")
-                        }
+                is UiState.Success -> {
+                    if (state.data.isEmpty()) {
+                        EmptyState(message = "Фильмы не найдены")
                     } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(8.dp),
-                            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(
-                                items = state.movies,
+                                items = state.data,
                                 key = { it.id }
                             ) { movie ->
                                 MovieListItem(
@@ -113,13 +139,11 @@ fun MovieListScreen(
                         }
                     }
                 }
-                is MovieListUiState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Ошибка: ${state.message}")
-                    }
+                is UiState.Error -> {
+                    ErrorState(
+                        message = state.message,
+                        onRetry = viewModel::retry
+                    )
                 }
             }
         }
@@ -139,18 +163,14 @@ fun MovieListItem(movie: Movie, onItemClick: () -> Unit) {
                 .fillMaxWidth()
                 .padding(12.dp)
         ) {
-            Box(
+            AsyncImage(
+                model = movie.posterUrl,
+                contentDescription = "Постер ${movie.title}",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(100.dp)
-                    .clip(MaterialTheme.shapes.medium)
-            ) {
-                AsyncImage(
-                    model = movie.posterUrl,
-                    contentDescription = "Постер ${movie.title}",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+            )
 
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -199,6 +219,74 @@ fun MovieListItem(movie: Movie, onItemClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun ErrorState(
+    message: String,
+    onRetry: () -> Unit
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Warning,
+                contentDescription = "Ошибка",
+                tint = Color.Red,
+                modifier = Modifier.size(64.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Ошибка",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                onClick = onRetry,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text("Повторить")
+            }
+        }
+    }
+}
+
+@Composable
+fun EmptyState(message: String) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Не найдено",
+                tint = Color.Gray,
+                modifier = Modifier.size(64.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
         }
     }
 }

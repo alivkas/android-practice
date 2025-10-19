@@ -17,7 +17,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.android_practice.di.appModule
 import com.example.android_practice.navigation.BottomNavItem
-import com.example.android_practice.ui.theme.AndroidpracticeTheme
+import com.example.android_practice.presentation.ui.theme.AndroidpracticeTheme
 import mainNavGraph
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext.startKoin

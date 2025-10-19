@@ -1,4 +1,4 @@
-package com.example.android_practice.ui.screens.placeholder
+package com.example.android_practice.presentation.ui.screens.placeholder
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
