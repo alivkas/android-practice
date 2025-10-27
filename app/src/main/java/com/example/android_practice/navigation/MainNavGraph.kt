@@ -1,13 +1,15 @@
+package com.example.android_practice.navigation
+
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.example.android_practice.navigation.Screen
+import com.example.android_practice.presentation.ui.screens.favorites.FavoritesScreen
+import com.example.android_practice.presentation.ui.screens.filters.FilterScreen
 import com.example.android_practice.presentation.ui.screens.moviedetails.MovieDetailsScreen
 import com.example.android_practice.presentation.ui.screens.movielist.MovieListScreen
-import com.example.android_practice.presentation.ui.screens.placeholder.PlaceholderScreen
 
 fun NavGraphBuilder.mainNavGraph(navController: NavHostController) {
     navigation(
@@ -18,6 +20,9 @@ fun NavGraphBuilder.mainNavGraph(navController: NavHostController) {
             MovieListScreen(
                 onMovieClick = { movieId ->
                     navController.navigate(Screen.Details.createRoute(movieId))
+                },
+                onFiltersClick = {
+                    navController.navigate(Screen.Filters.route)
                 }
             )
         }
@@ -34,11 +39,23 @@ fun NavGraphBuilder.mainNavGraph(navController: NavHostController) {
         }
 
         composable(route = Screen.Favorites.route) {
-            PlaceholderScreen(text = "Избранное")
+            FavoritesScreen(
+                onBackClick = { navController.popBackStack() },
+                onMovieClick = { movieId ->
+                    navController.navigate(Screen.Details.createRoute(movieId))
+                }
+            )
         }
 
-        composable(route = Screen.Profile.route) {
-            PlaceholderScreen(text = "Профиль")
+        composable(route = Screen.Filters.route) {
+            FilterScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onApplyFilters = { settings ->
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

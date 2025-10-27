@@ -42,6 +42,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.android_practice.presentation.state.UiState
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +53,7 @@ fun MovieDetailsScreen(
     viewModel: MovieDetailsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isFavorite by viewModel.isFavorite.collectAsState()
 
     LaunchedEffect(movieId) {
         viewModel.loadMovie(movieId)
@@ -72,6 +75,21 @@ fun MovieDetailsScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            (uiState as? UiState.Success)?.data?.let { movie ->
+                                viewModel.toggleFavorite(movie)
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = "Избранное",
+                            tint = if (isFavorite) Color.Red else MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 }
             )
