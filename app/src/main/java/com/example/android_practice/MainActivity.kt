@@ -63,7 +63,8 @@ fun MainApp() {
                 listOf(
                     BottomNavItem.Home,
                     BottomNavItem.Favorites,
-                    BottomNavItem.Filters
+                    BottomNavItem.Filters,
+                    BottomNavItem.Profile
                 ).forEach { item ->
                     NavigationBarItem(
                         icon = {
