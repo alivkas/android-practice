@@ -3,7 +3,7 @@ package com.example.android_practice.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class BottomNavItem(
@@ -13,7 +13,7 @@ sealed class BottomNavItem(
 ) {
     object Home : BottomNavItem(
         route = "home",
-        title = "Главная",
+        title = "Фильмы",
         icon = Icons.Default.Home
     )
 
@@ -23,9 +23,9 @@ sealed class BottomNavItem(
         icon = Icons.Default.Favorite
     )
 
-    object Profile : BottomNavItem(
-        route = "profile",
-        title = "Профиль",
-        icon = Icons.Default.Person
+    object Filters : BottomNavItem(
+        route = "filters",
+        title = "Фильтры",
+        icon = Icons.Default.Settings
     )
 }
