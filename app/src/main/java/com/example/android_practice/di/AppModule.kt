@@ -10,6 +10,8 @@ import com.example.android_practice.data.database.MovieDatabase
 import com.example.android_practice.data.database.dao.FavoriteMovieDao
 import com.example.android_practice.data.datastore.FilterPreferences
 import com.example.android_practice.data.datastore.filterDataStore
+import com.example.android_practice.data.manager.DownloadManager
+import com.example.android_practice.data.manager.ImageManager
 import com.example.android_practice.data.repository.impl.FavoriteRepositoryImpl
 import com.example.android_practice.data.repository.impl.FilterRepositoryImpl
 import com.example.android_practice.data.repository.impl.MovieRepositoryImpl
@@ -25,6 +27,7 @@ import com.example.android_practice.presentation.ui.screens.moviedetails.MovieDe
 import com.example.android_practice.presentation.ui.screens.movielist.MovieListViewModel
 import com.example.android_practice.presentation.ui.screens.profile.EditProfileViewModel
 import com.example.android_practice.presentation.ui.screens.profile.ProfileViewModel
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -84,6 +87,8 @@ val appModule = module {
     factory<SaveFilterSettingsUseCase> { SaveFilterSettingsUseCase(get()) }
     factory<GetProfileUseCase> { GetProfileUseCase(get()) }
     factory<SaveProfileUseCase> { SaveProfileUseCase(get()) }
+    factory { ImageManager(get()) }
+    factory { DownloadManager(get()) }
 
     viewModel<MovieListViewModel> {
         MovieListViewModel(
@@ -121,14 +126,17 @@ val appModule = module {
 
     viewModel<ProfileViewModel> {
         ProfileViewModel(
-            getProfileUseCase = get()
+            getProfileUseCase = get(),
+            downloadManager = get()
         )
     }
 
     viewModel<EditProfileViewModel> {
         EditProfileViewModel(
-            getProfileUseCase = get(),
-            saveProfileUseCase = get()
+            androidApplication(),
+            get(),
+            get(),
+            get()
         )
     }
 }

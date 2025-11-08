@@ -115,6 +115,20 @@ fun ProfileContent(
                 if (uiState.profile.email.isNotEmpty()) {
                     ProfileField("Email", uiState.profile.email)
                 }
+                if (uiState.message != null) {
+                    Text(
+                        text = uiState.message,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
+                if (uiState.error != null) {
+                    Text(
+                        text = uiState.error,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
             }
         }
 

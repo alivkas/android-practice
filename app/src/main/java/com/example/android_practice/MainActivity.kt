@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         startKoin {
-            androidContext(this@MainActivity)
+            androidContext(application)
             modules(appModule)
         }
 
