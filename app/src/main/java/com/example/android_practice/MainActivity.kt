@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         startKoin {
-            androidContext(this@MainActivity)
+            androidContext(application)
             modules(appModule)
         }
 
@@ -63,7 +63,8 @@ fun MainApp() {
                 listOf(
                     BottomNavItem.Home,
                     BottomNavItem.Favorites,
-                    BottomNavItem.Filters
+                    BottomNavItem.Filters,
+                    BottomNavItem.Profile
                 ).forEach { item ->
                     NavigationBarItem(
                         icon = {

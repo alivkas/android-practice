@@ -10,6 +10,8 @@ import com.example.android_practice.presentation.ui.screens.favorites.FavoritesS
 import com.example.android_practice.presentation.ui.screens.filters.FilterScreen
 import com.example.android_practice.presentation.ui.screens.moviedetails.MovieDetailsScreen
 import com.example.android_practice.presentation.ui.screens.movielist.MovieListScreen
+import com.example.android_practice.presentation.ui.screens.profile.EditProfileScreen
+import com.example.android_practice.presentation.ui.screens.profile.ProfileScreen
 
 fun NavGraphBuilder.mainNavGraph(navController: NavHostController) {
     navigation(
@@ -55,6 +57,22 @@ fun NavGraphBuilder.mainNavGraph(navController: NavHostController) {
                 onApplyFilters = { settings ->
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable(route = Screen.Profile.route) {
+            ProfileScreen(
+                onEditClick = {
+                    navController.navigate(Screen.EditProfile.route)
+                },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(route = Screen.EditProfile.route) {
+            EditProfileScreen(
+                onBackClick = { navController.popBackStack() },
+                onSaveClick = { navController.popBackStack() }
             )
         }
     }
